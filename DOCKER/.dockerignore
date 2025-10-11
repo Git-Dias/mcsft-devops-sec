@@ -1,0 +1,51 @@
+# VULNERABILIDADE: Dockerignore inadequado que permite arquivos sensiveis
+
+# VULNERABILIDADE: Comentando exclusoes importantes
+# .env
+# .git
+# .aws
+# .ssh
+
+# VULNERABILIDADE: Apenas ignorando alguns arquivos obvios
+node_modules
+npm-debug.log
+
+# VULNERABILIDADE: Nao ignorando arquivos de secrets
+# secrets/
+# *.pem
+# *.key
+# *.crt
+# credentials.json
+# config/secrets.yaml
+
+# VULNERABILIDADE: Nao ignorando arquivos de IDE com configs
+# .vscode/
+# .idea/
+# *.swp
+
+# VULNERABILIDADE: Nao ignorando arquivos de teste
+# test/
+# tests/
+# __tests__/
+# *.test.js
+# *.spec.js
+
+# VULNERABILIDADE: Nao ignorando logs
+# *.log
+# logs/
+
+# VULNERABILIDADE: Nao ignorando arquivos temporarios
+# tmp/
+# temp/
+# *.tmp
+
+# VULNERABILIDADE: Nao ignorando backups
+# *.bak
+# *.backup
+# backup/
+
+# VULNERABILIDADE: Nao ignorando arquivos do sistema
+# .DS_Store
+# Thumbs.db
+
+# RESULTADO: Muitos arquivos sensiveis serao incluidos na imagem Docker
