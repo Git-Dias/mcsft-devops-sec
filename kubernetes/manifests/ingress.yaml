@@ -1,0 +1,49 @@
+# VULNERABILIDADE: Ingress sem TLS configurado
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: vulnerable-ingress
+  namespace: vulnerable-namespace
+  annotations:
+    # VULNERABILIDADE: SSL redirect desabilitado
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    
+    # VULNERABILIDADE: Force SSL desabilitado
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+    
+    # VULNERABILIDADE: Permite HTTP
+    kubernetes.io/ingress.allow-http: "true"
+    
+    # VULNERABILIDADE: Sem rate limiting
+    # nginx.ingress.kubernetes.io/limit-rps: "10"
+    
+    # VULNERABILIDADE: Sem whitelist de IPs
+    # nginx.ingress.kubernetes.io/whitelist-source-range: "10.0.0.0/8"
+spec:
+  # VULNERABILIDADE: Sem ingressClassName especificado
+  # ingressClassName: nginx
+  
+  # VULNERABILIDADE: Sem spec.tls configurado
+  # tls:
+  # - hosts:
+  #   - vulnerable-app.example.com
+  #   secretName: tls-secret
+  
+  rules:
+  - host: vulnerable-app.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: vulnerable-service
+            port:
+              # VULNERABILIDADE: Apontando para porta HTTP
+              number: 80
+  
+  # VULNERABILIDADE: Sem segunda rule para redirect de HTTP para HTTPS
+  
+  # VULNERABILIDADE: Sem configuracao de timeout
+  # VULNERABILIDADE: Sem configuracao de CORS apropriada
+  # VULNERABILIDADE: Sem headers de seguranca configurados
