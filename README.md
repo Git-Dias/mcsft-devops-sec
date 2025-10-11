@@ -1,8 +1,8 @@
-# ⚠️ REPOSITÓRIO DE TESTE - VULNERABILIDADES PROPOSITAIS
+# REPOSITÓRIO DE TESTE - VULNERABILIDADES PROPOSITAIS
 
 Este repositório contém **INTENCIONALMENTE** múltiplas vulnerabilidades de segurança para fins de teste do Microsoft Defender for Cloud DevOps Security.
 
-## ⚠️ ATENÇÃO
+## ATENÇÃO
 - **NÃO** use este código em produção
 - **NÃO** provisione estes recursos
 - Todas as credenciais são exemplos fictícios
