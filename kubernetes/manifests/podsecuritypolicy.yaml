@@ -1,0 +1,173 @@
+# VULNERABILIDADE: PodSecurityPolicy muito permissiva
+# NOTA: PodSecurityPolicy foi depreciado no K8s 1.21 e removido no 1.25
+# Substituto: Pod Security Standards (PSS) e Pod Security Admission (PSA)
+
+# VULNERABILIDADE: Namespace sem Pod Security Standards
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: insecure-namespace
+  # VULNERABILIDADE: Sem labels de Pod Security Standards
+  # labels:
+  #   pod-security.kubernetes.io/enforce: restricted
+  #   pod-security.kubernetes.io/audit: restricted
+  #   pod-security.kubernetes.io/warn: restricted
+
+---
+# VULNERABILIDADE: PodSecurityPolicy permissiva (se ainda usar K8s antigo)
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: privileged-psp
+spec:
+  # VULNERABILIDADE: Permite containers privilegiados
+  privileged: true
+  
+  # VULNERABILIDADE: Permite escalacao de privilegios
+  allowPrivilegeEscalation: true
+  
+  # VULNERABILIDADE: Permite todas as capabilities
+  allowedCapabilities:
+  - '*'
+  
+  # VULNERABILIDADE: Permite acesso ao host network
+  hostNetwork: true
+  
+  # VULNERABILIDADE: Permite acesso ao host PID namespace
+  hostPID: true
+  
+  # VULNERABILIDADE: Permite acesso ao host IPC namespace
+  hostIPC: true
+  
+  # VULNERABILIDADE: Permite usar qualquer porta do host
+  hostPorts:
+  - min: 0
+    max: 65535
+  
+  # VULNERABILIDADE: Permite montar qualquer volume
+  volumes:
+  - '*'
+  
+  # VULNERABILIDADE: Permite containers rodarem como root
+  runAsUser:
+    rule: RunAsAny
+  
+  # VULNERABILIDADE: Permite qualquer grupo
+  runAsGroup:
+    rule: RunAsAny
+  
+  # VULNERABILIDADE: Permite qualquer FSGroup
+  fsGroup:
+    rule: RunAsAny
+  
+  # VULNERABILIDADE: Permite qualquer SELinux context
+  seLinux:
+    rule: RunAsAny
+  
+  # VULNERABILIDADE: Permite qualquer supplemental group
+  supplementalGroups:
+    rule: RunAsAny
+  
+  # VULNERABILIDADE: Filesystem nao precisa ser read-only
+  readOnlyRootFilesystem: false
+  
+  # VULNERABILIDADE: Permite hostPath volumes
+  allowedHostPaths:
+  - pathPrefix: "/"
+    readOnly: false
+
+---
+# VULNERABILIDADE: ClusterRole para usar PSP permissiva
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: use-privileged-psp
+rules:
+- apiGroups:
+  - policy
+  resources:
+  - podsecuritypolicies
+  verbs:
+  - use
+  resourceNames:
+  - privileged-psp
+
+---
+# VULNERABILIDADE: Binding da PSP permissiva para todos
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: all-use-privileged-psp
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: use-privileged-psp
+subjects:
+# VULNERABILIDADE: Todos service accounts podem usar PSP privilegiada
+- kind: Group
+  name: system:serviceaccounts
+  apiGroup: rbac.authorization.k8s.io
+# VULNERABILIDADE: Todos usuarios autenticados podem usar
+- kind: Group
+  name: system:authenticated
+  apiGroup: rbac.authorization.k8s.io
+
+---
+# EXEMPLO: Como deveria ser configurado (Pod Security Standards)
+# apiVersion: v1
+# kind: Namespace
+# metadata:
+#   name: secure-namespace
+#   labels:
+#     # Enforce restricted policy
+#     pod-security.kubernetes.io/enforce: restricted
+#     pod-security.kubernetes.io/enforce-version: latest
+#     
+#     # Audit baseline violations
+#     pod-security.kubernetes.io/audit: baseline
+#     pod-security.kubernetes.io/audit-version: latest
+#     
+#     # Warn on baseline violations
+#     pod-security.kubernetes.io/warn: baseline
+#     pod-security.kubernetes.io/warn-version: latest
+
+---
+# VULNERABILIDADE: ResourceQuota ausente
+# Namespace sem ResourceQuota permite uso ilimitado de recursos
+# apiVersion: v1
+# kind: ResourceQuota
+# metadata:
+#   name: namespace-quota
+#   namespace: vulnerable-namespace
+# spec:
+#   hard:
+#     requests.cpu: "10"
+#     requests.memory: 20Gi
+#     limits.cpu: "20"
+#     limits.memory: 40Gi
+#     persistentvolumeclaims: "10"
+#     services.loadbalancers: "2"
+
+---
+# VULNERABILIDADE: LimitRange ausente
+# Sem LimitRange containers podem requisitar recursos ilimitados
+# apiVersion: v1
+# kind: LimitRange
+# metadata:
+#   name: limit-range
+#   namespace: vulnerable-namespace
+# spec:
+#   limits:
+#   - max:
+#       cpu: "2"
+#       memory: 2Gi
+#     min:
+#       cpu: 100m
+#       memory: 128Mi
+#     default:
+#       cpu: 500m
+#       memory: 512Mi
+#     defaultRequest:
+#       cpu: 200m
+#       memory: 256Mi
+#     type: Container
