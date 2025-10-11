@@ -1,0 +1,120 @@
+# VULNERABILIDADE: Deployment com multiplas falhas de segurança
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vulnerable-app
+  namespace: vulnerable-namespace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vulnerable-app
+  template:
+    metadata:
+      labels:
+        app: vulnerable-app
+    spec:
+      # VULNERABILIDADE: ServiceAccount com privilegios excessivos
+      serviceAccountName: overprivileged-sa
+      
+      # VULNERABILIDADE: automountServiceAccountToken habilitado
+      automountServiceAccountToken: true
+      
+      # VULNERABILIDADE: hostNetwork habilitado - acesso a rede do host
+      hostNetwork: true
+      
+      # VULNERABILIDADE: hostPID habilitado - acesso aos processos do host
+      hostPID: true
+      
+      # VULNERABILIDADE: hostIPC habilitado - acesso ao IPC do host
+      hostIPC: true
+      
+      containers:
+      - name: app
+        # VULNERABILIDADE: Imagem usando tag latest
+        image: ubuntu:latest
+        
+        # VULNERABILIDADE: Container executando como root
+        securityContext:
+          # VULNERABILIDADE: Container em modo privilegiado
+          privileged: true
+          
+          # VULNERABILIDADE: Permite escalacao de privilegios
+          allowPrivilegeEscalation: true
+          
+          # VULNERABILIDADE: Permite executar como root
+          runAsNonRoot: false
+          
+          # VULNERABILIDADE: UID 0 root
+          runAsUser: 0
+          
+          # VULNERABILIDADE: Filesystem gravavel
+          readOnlyRootFilesystem: false
+          
+          # VULNERABILIDADE: Capacidades perigosas adicionadas
+          capabilities:
+            add:
+              - SYS_ADMIN
+              - NET_ADMIN
+              - SYS_PTRACE
+              - SYS_MODULE
+        
+        # VULNERABILIDADE: Secrets como variaveis de ambiente
+        env:
+        - name: DATABASE_PASSWORD
+          value: "MySecretPassword123"
+        - name: API_KEY
+          value: "sk-proj-abcdef123456"
+        - name: AWS_ACCESS_KEY_ID
+          value: "AKIAIOSFODNN7EXAMPLE"
+        - name: AWS_SECRET_ACCESS_KEY
+          value: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+        - name: ADMIN_TOKEN
+          value: "admin-token-123456789"
+        
+        # VULNERABILIDADE: Montando volumes sensiveis do host
+        volumeMounts:
+        - name: docker-sock
+          mountPath: /var/run/docker.sock
+        - name: host-root
+          mountPath: /host
+        - name: etc-passwd
+          mountPath: /etc/passwd
+        
+        # VULNERABILIDADE: Sem resource limits definidos
+        # resources:
+        #   limits:
+        #     cpu: 100m
+        #     memory: 128Mi
+        
+        # VULNERABILIDADE: Sem liveness probe
+        # VULNERABILIDADE: Sem readiness probe
+        
+        ports:
+        - containerPort: 22
+        - containerPort: 80
+        
+        command: ["/bin/sh"]
+        args:
+          - -c
+          - |
+            apt-get update
+            apt-get install -y openssh-server curl
+            echo "root:password" | chpasswd
+            service ssh start
+            while true; do sleep 3600; done
+      
+      # VULNERABILIDADE: Volumes montando caminhos sensiveis do host
+      volumes:
+      - name: docker-sock
+        hostPath:
+          path: /var/run/docker.sock
+          type: Socket
+      - name: host-root
+        hostPath:
+          path: /
+          type: Directory
+      - name: etc-passwd
+        hostPath:
+          path: /etc/passwd
+          type: File
