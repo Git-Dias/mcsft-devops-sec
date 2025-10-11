@@ -1,0 +1,12 @@
+{
+  "name": "vuln-node",
+  "version": "1.0.0",
+  "main": "index.js",
+  "dependencies": {
+    "express": "4.16.0",
+    "body-parser": "1.18.3"
+  },
+  "scripts": {
+    "start": "node index.js"
+  }
+}
