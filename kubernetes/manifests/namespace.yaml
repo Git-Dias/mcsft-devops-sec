@@ -1,0 +1,9 @@
+# 🔴 VULNERABILIDADE: Namespace sem políticas de segurança
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: vulnerable-namespace
+  # ⚠️ Sem labels de segurança
+  # ⚠️ Sem ResourceQuota
+  # ⚠️ Sem LimitRange
+  # ⚠️ Sem NetworkPolicy
