@@ -1,0 +1,67 @@
+# VULNERABILIDADE: ConfigMap contendo informacoes sensiveis
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: vulnerable-namespace
+data:
+  # VULNERABILIDADE: Database URL com credenciais em plaintext
+  database_url: "postgresql://admin:supersecret@db.example.com:5432/mydb"
+  
+  # VULNERABILIDADE: Connection string com senha
+  connection_string: "Server=sql.example.com;Database=mydb;User=sa;Password=Admin123;"
+  
+  # VULNERABILIDADE: API token em ConfigMap deveria estar em Secret
+  api_token: "xoxb-1234567890-1234567890-abcdefghijklmnopqrstuvwx"
+  
+  # VULNERABILIDADE: Stripe key em plaintext
+  stripe_key: "sk_live_51234567890abcdefghijklmnopqrstuvwxyz"
+  
+  # VULNERABILIDADE: JWT secret em ConfigMap
+  jwt_secret: "my-super-secret-jwt-key-12345"
+  
+  # VULNERABILIDADE: Admin password em plaintext
+  admin_password: "Admin@123456"
+  
+  # VULNERABILIDADE: AWS credentials em ConfigMap
+  aws_access_key: "AKIAIOSFODNN7EXAMPLE"
+  aws_secret_key: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+  
+  # VULNERABILIDADE: GitHub token exposto
+  github_token: "ghp_1234567890abcdefghijklmnopqrstuvwxyz"
+  
+  # VULNERABILIDADE: Slack webhook URL
+  slack_webhook: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXX"
+  
+  # VULNERABILIDADE: Sendgrid API key
+  sendgrid_api_key: "SG.1234567890abcdefghijklmnopqrstuvwxyz"
+  
+  # VULNERABILIDADE: Azure storage connection string
+  azure_storage: "DefaultEndpointsProtocol=https;AccountName=myaccount;AccountKey=abcd1234;EndpointSuffix=core.windows.net"
+  
+  # VULNERABILIDADE: Configuracao com endpoints internos expostos
+  config.json: |
+    {
+      "api_endpoint": "https://internal-api.example.com",
+      "database": {
+        "host": "prod-db.internal.example.com",
+        "port": 5432,
+        "username": "dbadmin",
+        "password": "DBPassword123"
+      },
+      "redis": {
+        "host": "redis.internal.example.com",
+        "port": 6379,
+        "password": "RedisPass123"
+      },
+      "encryption_key": "0123456789abcdef0123456789abcdef",
+      "secret_token": "super-secret-token-xyz"
+    }
+  
+  # VULNERABILIDADE: Configuracao de aplicacao com credenciais
+  application.properties: |
+    spring.datasource.url=jdbc:postgresql://db:5432/mydb
+    spring.datasource.username=admin
+    spring.datasource.password=password123
+    jwt.secret=my-jwt-secret-key
+    api.key=sk-1234567890abcdefghijklmnop
