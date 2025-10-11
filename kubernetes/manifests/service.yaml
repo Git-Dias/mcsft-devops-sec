@@ -1,0 +1,62 @@
+# VULNERABILIDADE: Service expondo portas perigosas publicamente
+apiVersion: v1
+kind: Service
+metadata:
+  name: vulnerable-service
+  namespace: vulnerable-namespace
+spec:
+  # VULNERABILIDADE: LoadBalancer expoe o servico publicamente
+  type: LoadBalancer
+  
+  # VULNERABILIDADE: Sem loadBalancerSourceRanges para restringir IPs
+  # loadBalancerSourceRanges:
+  #   - 10.0.0.0/8
+  
+  selector:
+    app: vulnerable-app
+  
+  ports:
+  # VULNERABILIDADE: SSH exposto publicamente
+  - name: ssh
+    port: 22
+    targetPort: 22
+    protocol: TCP
+  
+  # VULNERABILIDADE: Telnet exposto publicamente
+  - name: telnet
+    port: 23
+    targetPort: 23
+    protocol: TCP
+  
+  # VULNERABILIDADE: HTTP sem TLS
+  - name: http
+    port: 80
+    targetPort: 80
+    protocol: TCP
+  
+  # VULNERABILIDADE: MySQL exposto publicamente
+  - name: mysql
+    port: 3306
+    targetPort: 3306
+    protocol: TCP
+  
+  # VULNERABILIDADE: PostgreSQL exposto publicamente
+  - name: postgres
+    port: 5432
+    targetPort: 5432
+    protocol: TCP
+  
+  # VULNERABILIDADE: Redis exposto publicamente
+  - name: redis
+    port: 6379
+    targetPort: 6379
+    protocol: TCP
+  
+  # VULNERABILIDADE: MongoDB exposto publicamente
+  - name: mongodb
+    port: 27017
+    targetPort: 27017
+    protocol: TCP
+  
+  # VULNERABILIDADE: Sem sessionAffinity configurado quando necessario
+  # VULNERABILIDADE: Sem externalTrafficPolicy configurado
