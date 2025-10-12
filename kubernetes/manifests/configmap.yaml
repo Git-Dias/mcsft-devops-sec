@@ -62,6 +62,6 @@ data:
   application.properties: |
     spring.datasource.url=jdbc:postgresql://db:5432/mydb
     spring.datasource.username=admin
-    spring.datasource.password=password123
+    spring.datasource.password=password12
     jwt.secret=my-jwt-secret-key
     api.key=sk-1234567890abcdefghijklmnop
