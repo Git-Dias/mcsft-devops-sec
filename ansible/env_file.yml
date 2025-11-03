@@ -1,0 +1,23 @@
+- name: Create application .env with secrets in plaintext and world-readable permissions
+  hosts: all
+  become: true
+  tasks:
+    - name: Create app directory
+      file:
+        path: /opt/vulnapp
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Write .env with secrets in plaintext
+      copy:
+        dest: /opt/vulnapp/.env
+        content: |
+          DB_HOST=127.0.0.1
+          DB_USER=labapp
+          DB_PASS=lab123
+          API_KEY=ghp_exampletoken1234567890
+        owner: root
+        group: root
+        mode: '0666'  # intentionally weak: world-readable/writable

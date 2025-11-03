@@ -1,0 +1,37 @@
+- name: MySQL insecure install (empty root password + remote root)
+  hosts: all
+  become: true
+  vars:
+    mysql_root_password: ""  # intentionally empty
+  tasks:
+    - name: Install MySQL server
+      apt:
+        name: default-mysql-server
+        state: present
+        update_cache: yes
+
+    - name: Ensure MySQL is running
+      service:
+        name: mysql
+        state: started
+        enabled: yes
+
+    - name: Remove root password (insecure) - lab use only
+      mysql_user:
+        name: root
+        host_all: yes
+        password: ""
+        priv: '*.*:ALL,GRANT'
+        state: present
+
+    - name: Create database with weak credentials stored in plaintext
+      mysql_db:
+        name: labdb
+        state: present
+
+    - name: Create labdb user with weak password
+      mysql_user:
+        name: labapp
+        password: 'lab123'
+        priv: 'labdb.*:ALL'
+        state: present

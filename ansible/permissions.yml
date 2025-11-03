@@ -1,0 +1,11 @@
+- name: Create world-writable file containing secrets (lab-only)
+  hosts: all
+  become: true
+  tasks:
+    - name: Create /opt/lab-credentials.txt with sensitive data and weak permissions
+      copy:
+        dest: /opt/lab-credentials.txt
+        content: "DB_USER=labapp\nDB_PASS=lab123\nSSH_WEAK=labssh\n"
+        owner: root
+        group: root
+        mode: '0777'

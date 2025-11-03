@@ -1,0 +1,17 @@
+- name: Install intentionally outdated packages (to simulate vulnerable versions)
+  hosts: all
+  become: true
+  tasks:
+    - name: Pin an older OpenSSL (example) - adjust version to one available in your distro mirrors
+      apt:
+        name: openssl=1.1.1f-1ubuntu2
+        state: present
+      ignore_errors: yes
+
+    - name: Create marker file indicating intentionally outdated packages
+      copy:
+        dest: /opt/vuln_outdated_marker.txt
+        content: "Outdated packages installed for lab testing. Revert after testing."
+        owner: root
+        group: root
+        mode: '0644'

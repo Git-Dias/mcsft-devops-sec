@@ -1,0 +1,22 @@
+- name: Place AWS credentials in plaintext under user's home (simulates accidental commit/placement)
+  hosts: all
+  become: true
+  tasks:
+    - name: Create .aws directory
+      file:
+        path: /home/$(ansible_user_id)/.aws
+        state: directory
+        owner: "{{ ansible_user_id }}"
+        group: "{{ ansible_user_gid | default(ansible_user_id) }}"
+        mode: '0700'
+
+    - name: Write credentials file with access keys in plaintext
+      copy:
+        dest: "/home/{{ ansible_user_id }}/.aws/credentials"
+        content: |
+          [default]
+          aws_access_key_id = AKIAEXAMPLEKEY
+          aws_secret_access_key = secretExampleKey123
+        owner: "{{ ansible_user_id }}"
+        group: "{{ ansible_user_gid | default(ansible_user_id) }}"
+        mode: '0600'

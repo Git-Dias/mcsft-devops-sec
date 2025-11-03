@@ -1,0 +1,30 @@
+- name: Deploy simple vulnerable web app (default creds, exposed info)
+  hosts: all
+  become: true
+  tasks:
+    - name: Install nginx
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+
+    - name: Place vulnerable index.html with exposed credentials
+      copy:
+        dest: /var/www/html/index.html
+        content: |
+          <html>
+          <body>
+          <h1>Lab vulnerable webapp</h1>
+          <p>Default admin credentials: admin / admin123</p>
+          <pre>Sensitive config: DB_USER=labapp DB_PASS=lab123</pre>
+          </body>
+          </html>
+        owner: www-data
+        group: www-data
+        mode: '0644'
+
+    - name: Ensure nginx is started
+      service:
+        name: nginx
+        state: started
+        enabled: yes

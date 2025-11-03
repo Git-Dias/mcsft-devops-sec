@@ -1,0 +1,45 @@
+- name: Vulnerable SSH configuration (enable root login, password auth, weak user pwd)
+  hosts: all
+  become: true
+  tasks:
+    - name: Ensure openssh-server is installed
+      apt:
+        name: openssh-server
+        state: present
+        update_cache: yes
+
+    - name: Allow SSH root login and password authentication
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^#?PermitRootLogin'
+        line: 'PermitRootLogin yes'
+        state: present
+      notify: restart ssh
+
+    - name: Ensure password authentication enabled
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^#?PasswordAuthentication'
+        line: 'PasswordAuthentication yes'
+        state: present
+      notify: restart ssh
+
+    - name: Create weak user 'labuser' with a simple password (hash provided)
+      user:
+        name: labuser
+        comment: "Lab user with weak password"
+        password: "$6$rounds=10000$lab$Kf1yV6qX8pRj1qG6hH5pYBq9c9k5Vw0dWqz6vN1Hq9aRZsF7dG2q/" # exemplo: P@ssw0rd123
+        shell: /bin/bash
+        createhome: yes
+
+    - name: Add labuser to sudoers (regular sudo)
+      user:
+        name: labuser
+        groups: sudo
+        append: yes
+
+  handlers:
+    - name: restart ssh
+      service:
+        name: ssh
+        state: restarted

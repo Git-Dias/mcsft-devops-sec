@@ -1,0 +1,20 @@
+- name: Write CI pipeline token into repo-like directory (simulating committed token)
+  hosts: all
+  become: true
+  tasks:
+    - name: Create repo dir
+      file:
+        path: /opt/repo_sim
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Add .github/workflows/ci.yml with embedded token (simulated)
+      copy:
+        dest: /opt/repo_sim/.github_workflow_ci_token.txt
+        content: "GITHUB_TOKEN=ghp_exampletoken1234567890
+"
+        owner: root
+        group: root
+        mode: '0644'

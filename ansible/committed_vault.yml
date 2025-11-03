@@ -1,0 +1,23 @@
+- name: Simulate committed Ansible Vault password file and vault usage (insecure practice)
+  hosts: all
+  become: true
+  tasks:
+    - name: Create an example Ansible Vault-encrypted secret file placeholder (here stored as plaintext to simulate mistake)
+      copy:
+        dest: /opt/ansible-secrets/credentials.yml
+        content: |
+          # WARNING: this file intentionally written in plaintext to simulate a developer committing secrets instead of using vault correctly
+          github_token: ghp_exampletoken1234567890
+          db_password: lab123
+        owner: root
+        group: root
+        mode: '0600'
+
+    - name: Simulate committed vault password file in repo (very insecure)
+      copy:
+        dest: /opt/ansible-secrets/.vault_pass.txt
+        content: "supersecretvaultpassword
+"
+        owner: root
+        group: root
+        mode: '0644'  # intentionally world-readable to simulate leak

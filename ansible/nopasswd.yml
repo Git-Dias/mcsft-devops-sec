@@ -1,0 +1,18 @@
+- name: Vulnerable sudoers (NOPASSWD entry)
+  hosts: all
+  become: true
+  tasks:
+    - name: Create user 'nopriv' for sudo NOPASSWD
+      user:
+        name: nopriv
+        password: "$6$abc$abcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcd" # troque conforme necessário
+        shell: /bin/bash
+        createhome: yes
+
+    - name: Give nopriv NOPASSWD sudo rights
+      copy:
+        dest: /etc/sudoers.d/99-nopriv
+        content: "nopriv ALL=(ALL) NOPASSWD: ALL\n"
+        owner: root
+        group: root
+        mode: '0440'
