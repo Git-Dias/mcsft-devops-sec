@@ -1,0 +1,10 @@
+# configmap-api.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sensitive-api-config
+data:
+  # ITEM VULNERAVEL: URI de API confidencial que nao deveria ser publicamente acessivel
+  API_ENDPOINT: "https://minha-api-secreta.com/v1/admin/usuarios"
+  # ITEM VULNERAVEL: Senha simples em um ConfigMap
+  DB_PASSWORD_INSECURE: "root12345"
